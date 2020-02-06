@@ -67,7 +67,7 @@ L.HexbinLayer = L.SVG.extend({
 		};
 
 		// Set up the Dispatcher for managing events and callbacks
-		this._dispatch = d3.dispatch('mouseover', 'mouseout', 'click');
+		this._dispatch = d3.dispatch('mouseover', 'mouseout', 'click', 'binschanged');
 
 		// Set up the default hover handler
 		this._hoverHandler = L.HexbinHoverHandler.none();
@@ -227,6 +227,8 @@ L.HexbinLayer = L.SVG.extend({
 		bins = bins.filter(function(d) {
 			return bounds.contains(that._map.layerPointToLatLng(L.point(d.x, d.y)));
 		});
+		that._dispatch.call('binschanged', this, d3.extent(bins, function(d) { return d.length; }));
+
 		var join = g.selectAll('g.hexbin-container')
 			.data(bins, function(d) {
 				return d.x + ':' + d.y;
