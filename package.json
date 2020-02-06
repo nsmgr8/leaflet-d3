@@ -10,6 +10,7 @@
 	"scripts": {
 		"build": "npm run bundle",
 		"prebuild": "npm run lint",
+		"prepare": "npm run bundle",
 		"bundle": "npm run rollup && npm run uglify",
 		"lint": "eslint 'src/**/*.js'",
 		"rollup": "rollup -c rollup.config.js",
