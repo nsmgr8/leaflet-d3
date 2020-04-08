@@ -12,6 +12,7 @@ import 'leaflet';
  * (which is why we have this convoluted nested ternary statement
  */
 var d3_hexbin = (null != d3.hexbin)? d3.hexbin : (null != d3Hexbin)? d3Hexbin.hexbin : null;
+var isIE11 = window.MSInputMethodContext && document.documentMode;
 
 /**
  * L is defined by the Leaflet library, see git://github.com/Leaflet/Leaflet.git for documentation
@@ -67,7 +68,9 @@ L.HexbinLayer = L.SVG.extend({
 		};
 
 		// Set up the Dispatcher for managing events and callbacks
-		this._dispatch = d3.dispatch('mouseover', 'mouseout', 'click', 'binschanged');
+    if (!isIE11) {
+      this._dispatch = d3.dispatch('mouseover', 'mouseout', 'click', 'binschanged');
+    }
 
 		// Set up the default hover handler
 		this._hoverHandler = L.HexbinHoverHandler.none();
@@ -227,7 +230,9 @@ L.HexbinLayer = L.SVG.extend({
 		bins = bins.filter(function(d) {
 			return bounds.contains(that._map.layerPointToLatLng(L.point(d.x, d.y)));
 		});
-		that._dispatch.call('binschanged', this, d3.extent(bins, function(d) { return d.length; }));
+    if (!isIE11) {
+      that._dispatch.call('binschanged', this, d3.extent(bins, function(d) { return d.length; }));
+    }
 
 		var join = g.selectAll('g.hexbin-container')
 			.data(bins, function(d) {
@@ -286,19 +291,21 @@ L.HexbinLayer = L.SVG.extend({
 			.attr('stroke', 'none')
 			.style('pointer-events', that.options.pointerEvents);
 
-		// Grid enter-update
-		gridEnter.merge(join.select('path.hexbin-grid'))
-			.on('mouseover', function(d, i) {
-				that._hoverHandler.mouseover.call(this, that, d, i);
-				that._dispatch.call('mouseover', this, d, i);
-			})
-			.on('mouseout', function(d, i) {
-				that._dispatch.call('mouseout', this, d, i);
-				that._hoverHandler.mouseout.call(this, that, d, i);
-			})
-			.on('click', function(d, i) {
-				that._dispatch.call('click', this, d, i);
-			});
+    if (!isIE11) {
+      // Grid enter-update
+      gridEnter.merge(join.select('path.hexbin-grid'))
+        .on('mouseover', function(d, i) {
+          that._hoverHandler.mouseover.call(this, that, d, i);
+          that._dispatch.call('mouseover', this, d, i);
+        })
+        .on('mouseout', function(d, i) {
+          that._dispatch.call('mouseout', this, d, i);
+          that._hoverHandler.mouseout.call(this, that, d, i);
+        })
+        .on('click', function(d, i) {
+          that._dispatch.call('click', this, d, i);
+        });
+    }
 
 
 		// Exit
